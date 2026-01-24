@@ -16,9 +16,12 @@ The sample rosbag from the tutorial contains only **3 LiDARs** (top, left, right
 
 ### Modified Files
 
-- `lidar.launch.xml`: Removed rear LiDAR definition
-- `pointcloud_preprocessor.launch.py`: Concatenates 3 point cloud topics instead of 4
-- `sensing.launch.xml`: Includes IMU/GNSS from `sample_sensor_kit_launch`
+Based on `sample_sensor_kit_launch` from Autoware 1.5.0 with these changes:
+
+- `config/concatenate_and_time_sync_node.param.yaml`: 3 lidar topics instead of 4
+- `launch/lidar.launch.xml`: Removed rear LiDAR definition
+- `launch/pointcloud_preprocessor.launch.py`: Points to local config file
+- `launch/sensing.launch.xml`: Includes IMU/GNSS from `sample_sensor_kit_launch`
 
 ## Usage
 
