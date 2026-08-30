@@ -6,18 +6,59 @@
   <arg name="vehicle_mirror_param_file"/>
   <arg name="pointcloud_container_name" default="pointcloud_container"/>
 
+  <!--
+    Restricted-FOV study knobs, default to the sensor's own full FOV so an
+    unmodified run is unchanged.
+
+    Nebula applies both at decode, so a crop here costs nothing downstream and
+    produces exactly the cloud a narrower sensor would have delivered. Used to
+    ask whether NDT still localizes on a Seyond Robin-W's 120 deg x 70 deg, 70 m
+    envelope using this bag, since no Robin-W recording exists.
+
+    top_cloud_min_angle / top_cloud_max_angle are DEGREES in the sensor's own
+    azimuth frame, not vehicle-relative, so which window faces forward has to be
+    established empirically before a number here means anything.
+
+    Defaulted from the environment rather than plumbed as launch arguments,
+    following the vehicle_id precedent above and for the same unavoidable reason:
+    this file is reached through tier4_sensing_component.launch.xml and
+    tier4_sensing_launch/sensing.launch.xml, installed Autoware files that
+    forward a fixed set of arguments and silently drop the rest. There is no
+    launch-argument path from ndt_replay_simulation.launch.xml down to here.
+    scripts/fov_study.sh exports them; nobody sets them by hand.
+
+    Only the top VLS128 is exposed, and that is enough to make the study mean
+    something: the two VLP16s run at max_range 5.0, so they see the vehicle's
+    immediate surroundings and contribute almost nothing to a scan match against
+    a map. Cropping the top sensor is therefore cropping what NDT actually uses.
+  -->
+  <!--
+    scan_phase has to travel with the crop. The Velodyne decoder cuts one scan
+    from the next at this azimuth, so when it falls outside the retained window
+    the boundary is never crossed and the decoder emits nothing at all. Not a thin
+    cloud, an absent one. Measured: window 0..90 with the stock phase of 300
+    produced zero top-sensor returns beyond 5 m for a whole run, while the two
+    VLP16s kept publishing and made it look like the pipeline was alive.
+  -->
+  <arg name="top_scan_phase" default="$(env NDT_FOV_SCAN_PHASE 300.0)"/>
+  <arg name="top_cloud_min_angle" default="$(env NDT_FOV_MIN_ANGLE 0)"/>
+  <arg name="top_cloud_max_angle" default="$(env NDT_FOV_MAX_ANGLE 360)"/>
+  <arg name="top_max_range" default="$(env NDT_FOV_MAX_RANGE 250.0)"/>
+
   <group>
     <push-ros-namespace namespace="lidar"/>
 
     <group>
       <push-ros-namespace namespace="top"/>
       <include file="$(find-pkg-share common_sensor_launch)/launch/velodyne_VLS128.launch.xml">
-        <arg name="max_range" value="250.0"/>
+        <arg name="max_range" value="$(var top_max_range)"/>
+        <arg name="cloud_min_angle" value="$(var top_cloud_min_angle)"/>
+        <arg name="cloud_max_angle" value="$(var top_cloud_max_angle)"/>
         <arg name="sensor_frame" value="velodyne_top"/>
         <arg name="sensor_ip" value="192.168.1.201"/>
         <arg name="host_ip" value="$(var host_ip)"/>
         <arg name="data_port" value="2368"/>
-        <arg name="scan_phase" value="300.0"/>
+        <arg name="scan_phase" value="$(var top_scan_phase)"/>
         <arg name="launch_driver" value="$(var launch_driver)"/>
         <arg name="vehicle_mirror_param_file" value="$(var vehicle_mirror_param_file)"/>
         <arg name="container_name" value="pointcloud_container"/>

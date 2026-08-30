@@ -1,0 +1,19 @@
+<launch>
+  <arg name="launch_driver" default="true"/>
+  <arg name="vehicle_mirror_param_file"/>
+  <arg name="pointcloud_container_name" default="pointcloud_container"/>
+  <arg name="vehicle_id" default="$(env VEHICLE_ID default)"/>
+
+  <!--
+    Deliberately empty.
+
+    The TIERS bag carries the OS0 as sensor_msgs/PointCloud2 already decoded, not
+    as vendor packets, so there is no driver to run and nothing to decode. There
+    is also no second LiDAR, so there is nothing to concatenate: localization
+    subscribes to the bag's topic directly via the input_pointcloud argument, or
+    to the restricted copy the FOV filter publishes.
+
+    Autoware's sensing component still includes this file and would fail if it
+    were absent, so it exists to be found and do nothing.
+  -->
+</launch>

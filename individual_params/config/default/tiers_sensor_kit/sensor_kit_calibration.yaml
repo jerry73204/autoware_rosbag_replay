@@ -1,0 +1,27 @@
+# The OS0-128 sits at the origin of base_link, deliberately.
+#
+# The rig's real mounting geometry is not published with the TIERS dataset, and
+# for this study it does not need to be. The map was built by accumulating the
+# OS0's own clouds along KISS-ICP's trajectory, which is expressed in the OS0's
+# frame, so putting base_link on the sensor makes the map, the trajectory and
+# the localized pose all the same frame. NDT's output can then be compared
+# against the KISS-ICP trajectory directly, with no extrinsic in between to be
+# wrong about.
+#
+# Do not copy this onto a vehicle. It is a statement that there is no extrinsic,
+# which is true here and false anywhere real.
+sensor_kit_base_link:
+  os0_sensor:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0
+  os0_imu:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0

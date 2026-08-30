@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="sensor_kit_macro" params="parent x y z roll pitch yaw">
+    <xacro:arg name="config_dir" default="$(find tiers_sensor_kit_description)/config"/>
+
+    <xacro:property name="sensor_kit_base_link" default="sensor_kit_base_link"/>
+
+    <joint name="${sensor_kit_base_link}_joint" type="fixed">
+      <origin rpy="${roll} ${pitch} ${yaw}" xyz="${x} ${y} ${z}"/>
+      <parent link="${parent}"/>
+      <child link="${sensor_kit_base_link}"/>
+    </joint>
+    <link name="${sensor_kit_base_link}">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </link>
+
+    <xacro:property name="calibration" value="${xacro.load_yaml('$(arg config_dir)/sensor_kit_calibration.yaml')}"/>
+
+    <!--
+      Plain links rather than the vendor URDF macros the other kits use. Those
+      exist to give a simulator a mesh and a Gazebo plugin; nothing here
+      simulates a sensor, the clouds come from a bag, and the only thing the
+      stack needs from this file is a frame at a known place.
+    -->
+    <joint name="os0_sensor_joint" type="fixed">
+      <origin
+        rpy="${calibration['sensor_kit_base_link']['os0_sensor']['roll']}
+             ${calibration['sensor_kit_base_link']['os0_sensor']['pitch']}
+             ${calibration['sensor_kit_base_link']['os0_sensor']['yaw']}"
+        xyz="${calibration['sensor_kit_base_link']['os0_sensor']['x']}
+             ${calibration['sensor_kit_base_link']['os0_sensor']['y']}
+             ${calibration['sensor_kit_base_link']['os0_sensor']['z']}"/>
+      <parent link="${sensor_kit_base_link}"/>
+      <child link="os0_sensor"/>
+    </joint>
+    <link name="os0_sensor"/>
+
+    <joint name="os0_imu_joint" type="fixed">
+      <origin
+        rpy="${calibration['sensor_kit_base_link']['os0_imu']['roll']}
+             ${calibration['sensor_kit_base_link']['os0_imu']['pitch']}
+             ${calibration['sensor_kit_base_link']['os0_imu']['yaw']}"
+        xyz="${calibration['sensor_kit_base_link']['os0_imu']['x']}
+             ${calibration['sensor_kit_base_link']['os0_imu']['y']}
+             ${calibration['sensor_kit_base_link']['os0_imu']['z']}"/>
+      <parent link="${sensor_kit_base_link}"/>
+      <child link="os0_imu"/>
+    </joint>
+    <link name="os0_imu"/>
+  </xacro:macro>
+</robot>
